@@ -1,0 +1,25 @@
+# Rename this file to terraform.tfvars afte substituting the values
+
+virtual_machine_name = <VM Name you would like to have>
+
+location = <Location>
+
+username = <someusername>
+
+prefix = <prefix for your resources names>
+
+susbcription_id = <Subscription ID of your Azure account>
+
+bastion_node_count = <No of bastion Nodes required>
+
+db_node_count = <No of db Nodes required>
+
+bastion_inbound_ports = ["22", "443", "80"]
+
+db_inbound_ports = ["8080", "22"]
+
+bastion_vm_size = "Standard_D4_v3"
+
+db_vm_size = "Standard_D2_v3"
+
+destination_ssh_key_path = </home/<someusername>/.ssh/authorized_keys>

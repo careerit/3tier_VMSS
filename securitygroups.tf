@@ -29,6 +29,41 @@ resource "azurerm_subnet_network_security_group_association" "bastion" {
 }
 
 
+# Security Group for Windows 
+
+resource "azurerm_network_security_group" "win" {
+  name                = "win"
+  location            = azurerm_resource_group.myapp.location
+  resource_group_name = azurerm_resource_group.myapp.name
+}
+
+
+# Security Group rules for Windows
+
+resource "azurerm_network_security_rule" "win" {
+  count                       = length(var.win_inbound_ports)
+  name                        = "sgrule-win-${count.index}"
+  direction                   = "Inbound"
+  access                      = "Allow"
+  priority                    = 100 * (count.index + 1)
+  source_address_prefix       = "*"
+  source_port_range           = "*"
+  destination_address_prefix  = "*"
+  destination_port_range      = element(var.win_inbound_ports, count.index)
+  protocol                    = "TCP"
+  resource_group_name         = azurerm_resource_group.myapp.name
+  network_security_group_name = azurerm_network_security_group.win.name
+}
+
+
+# Windows Security Group Association
+
+resource "azurerm_subnet_network_security_group_association" "win" {
+  subnet_id = azurerm_subnet.win.id
+  network_security_group_id = azurerm_network_security_group.win.id
+}
+
+
 # Security Group for db  Node
 resource "azurerm_network_security_group" "db" {
   name                = "db"
@@ -50,6 +85,9 @@ resource "azurerm_network_security_rule" "db" {
   resource_group_name         = azurerm_resource_group.myapp.name
   network_security_group_name = azurerm_network_security_group.db.name
 }
+
+
+# DB Security Group Association
 
 resource "azurerm_subnet_network_security_group_association" "db" {
   subnet_id = azurerm_subnet.db.id

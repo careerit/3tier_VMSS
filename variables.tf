@@ -48,6 +48,26 @@ variable "db_node_count" {
 }
 
 
+variable "win_node_count" {
+  description = "Number of Windows VMs"
+  default = 1
+}
+
+
+variable "win_inbound_ports" {
+  type = list(string)
+}
+variable "win_vm_size" {
+  description = "Size of the Windows Machine"
+  default = "Standard_B1s"
+}
+
+variable "password" {
+  description = "Password for Windows instance"
+  default = "StraangP@55Kee"
+}
+
+
 variable "db_vm_size" {
   description = "Size of the db Nodes"
 }

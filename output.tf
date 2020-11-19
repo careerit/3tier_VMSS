@@ -6,3 +6,8 @@ output "bastion_ip" {
 output "db_ip" {
    value = [azurerm_network_interface.db.*.private_ip_address]
 }
+
+
+output "win_ip" {
+   value = [azurerm_network_interface.win.*.private_ip_address]
+}

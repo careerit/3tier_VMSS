@@ -1,19 +1,20 @@
-#Build db nodes
-
 #Fetch the Cloudinit (userdate) file
 
-data "template_file" "db" {
-  template = file("${path.module}/Templates/cloudnint-db.tpl")
+data "template_file" "ansible" {
+  template = file("${path.module}/Templates/cloudnint-ansible.tpl")
 }
 
-resource "azurerm_virtual_machine" "db" {
-  count                 = var.db_node_count
-  name                  = "${var.prefix}-db-${count.index}"
+data "template_file" "key_data" {
+  template = file("/opt/class/keys/id_ansible.pub")
+}
+
+resource "azurerm_virtual_machine" "ansible" {
+  name                  = "${var.prefix}-ansible"
   location              = azurerm_resource_group.myapp.location
   resource_group_name   = azurerm_resource_group.myapp.name
-  network_interface_ids = [element(azurerm_network_interface.db.*.id, count.index)]
-  vm_size               = var.db_vm_size
-  depends_on            = [azurerm_virtual_machine.ansible]
+  network_interface_ids = [azurerm_network_interface.ansible.id]
+  vm_size               = var.ansible_vm_size
+
   # This means the OS Disk will be deleted when Terraform destroys the Virtual Machine
   # NOTE: This may not be optimal in all cases.
   delete_os_disk_on_termination = true
@@ -30,16 +31,17 @@ resource "azurerm_virtual_machine" "db" {
   }
 
   storage_os_disk {
-    name              = "${var.prefix}-db-${count.index}-db-osdisk"
+    name              = "${var.prefix}-ansible-osdisk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
 
   os_profile {
-    computer_name  = "${var.prefix}-db-${count.index}"
+    computer_name  = "${var.prefix}-ansible"
     admin_username = var.username
-    custom_data    = data.template_file.db.rendered
+    custom_data    = data.template_file.ansible.rendered
+    
   }
 
   os_profile_linux_config {
@@ -50,7 +52,4 @@ resource "azurerm_virtual_machine" "db" {
       path     = var.destination_ssh_key_path
     }
   }
-
-
 }
-

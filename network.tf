@@ -7,8 +7,8 @@ resource "azurerm_virtual_network" "myapp" {
   tags                = var.tags
 }
 
-resource "azurerm_subnet" "bastion" {
-  name                 = "bastion"
+resource "azurerm_subnet" "ansible" {
+  name                 = "ansible"
   resource_group_name  = azurerm_resource_group.myapp.name
   virtual_network_name = azurerm_virtual_network.myapp.name
   address_prefixes       = ["10.0.0.0/24"]
@@ -31,9 +31,9 @@ resource "azurerm_subnet" "db" {
   address_prefixes       = ["10.0.3.0/24"]
 }
 
-# NIC and IPs for bastion Node
-resource "azurerm_public_ip" "bastion" {
-  name                = "${var.prefix}-bastion-pip"
+# NIC and IPs for ansible Node
+resource "azurerm_public_ip" "ansible" {
+  name                = "${var.prefix}-ansible-pip"
   resource_group_name = azurerm_resource_group.myapp.name
   location            = azurerm_resource_group.myapp.location
   allocation_method   = "Static"
@@ -42,21 +42,18 @@ resource "azurerm_public_ip" "bastion" {
 }
 
 
-resource "azurerm_network_interface" "bastion" {
-  name                = "${var.prefix}-nic-bastion"
+resource "azurerm_network_interface" "ansible" {
+  name                = "${var.prefix}-nic-ansible"
   location            = azurerm_resource_group.myapp.location
   resource_group_name = azurerm_resource_group.myapp.name
 
   ip_configuration {
     name                          = "configuration"
-    subnet_id                     = azurerm_subnet.bastion.id
+    subnet_id                     = azurerm_subnet.ansible.id
     private_ip_address_allocation = "dynamic"
-    public_ip_address_id          = azurerm_public_ip.bastion.id
+    public_ip_address_id          = azurerm_public_ip.ansible.id
   }
 }
-
-
-
 
 
 # NIC For Windows 
@@ -86,15 +83,6 @@ resource "azurerm_network_interface" "win" {
 
 # NIC and IPs for db Nodes
 
-// resource "azurerm_public_ip" "db" {
-//   count               = "${var.db_node_count}"
-//   name                = "${var.prefix}-${count.index}-db-pip"
-//   resource_group_name = "${azurerm_resource_group.myapp.name}"
-//   location            = "${azurerm_resource_group.myapp.location}"
-//   allocation_method   = "Dynamic"
-//   sku                 = "Basic"
-//   tags                = "${var.tags}"
-// }
 
 resource "azurerm_network_interface" "db" {
   count               = var.db_node_count
@@ -108,3 +96,21 @@ resource "azurerm_network_interface" "db" {
     private_ip_address_allocation = "Dynamic"
   }
 }
+
+
+# NICs for Web servers
+
+
+resource "azurerm_network_interface" "web" {
+  count               = var.web_node_count
+  name                = "${var.prefix}-nic-web-${count.index}"
+  location            = azurerm_resource_group.myapp.location
+  resource_group_name = azurerm_resource_group.myapp.name
+
+  ip_configuration {
+    name                          = "configuration-${count.index}"
+    subnet_id                     = azurerm_subnet.web.id
+    private_ip_address_allocation = "Dynamic"
+    
+  }
+} 

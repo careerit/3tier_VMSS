@@ -1,6 +1,11 @@
-output "bastion_ip" {
-  value = azurerm_public_ip.bastion.ip_address
+output "ansible_ip" {
+  value = azurerm_public_ip.ansible.ip_address
 }
+
+output "web_ip" {
+   value = [azurerm_network_interface.web.*.private_ip_address]
+}
+
 
 
 output "db_ip" {

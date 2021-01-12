@@ -5,7 +5,7 @@ data "template_file" "ansible" {
 }
 
 data "template_file" "key_data" {
-  template = file("/opt/class/keys/id_ansible.pub")
+  template = file("/opt/lab/keys/id_ansible.pub")
 }
 
 resource "azurerm_virtual_machine" "ansible" {
